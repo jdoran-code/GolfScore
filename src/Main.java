@@ -1,10 +1,9 @@
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
-//Hello
+
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -194,7 +193,6 @@ public class Main {
     }
 
     public static int suddenDeath(int p1, int p2, int teamSize, int numHoles, Vector pars) {
-        Scanner scan = new Scanner(System.in);
         String competitor = getCompetitor(teamSize);
 
         System.out.println(competitor + "s " + p1 + " and " + p2 + " are tied for first place!");
