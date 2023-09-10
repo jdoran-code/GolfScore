@@ -8,61 +8,60 @@ import java.io.FileReader;
 public class Main {
     public static void main(String[] args) throws IOException {
         Scanner scan = new Scanner(System.in);
-        Vector courses = new Vector();
-        Vector pars = new Vector();
-
-        BufferedReader reader = new BufferedReader(new FileReader("courses.txt"));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            courses.grow(line);
-        }
-
-        BufferedReader reader2 = new BufferedReader(new FileReader("pars.txt"));
-        while ((line = reader2.readLine()) != null) {
-            pars.grow(line);
-        }
-
-        System.out.print("Name of Course: ");
-        String course = scan.nextLine();
-        int courseIndex = courses.findIndex(course);
-
-        int numHoles = getHoles();
-
+        Vector pars = new Vector(new String[19]);
+        String course;
+        int numHoles = 0;
         String section;
-        if (numHoles == 9) {
-            section = getSection();
-        } else {
-            section = null;
+
+        while(pars.array.length == 19) {
+            course = getCourse();
+            numHoles = getHoles();
+            if (numHoles == 9) {
+                section = getSection();
+            } else {
+                section = "";
+            }
+            getGame(pars, course, numHoles, section);
+
+            if (pars.array.length == 19) {
+                System.out.println("Course not on file, try again.");
+            }
         }
 
-        pars.getCourse(courseIndex, numHoles, section);
-
-        int numCompetitors;
+        int numUnits;
         int teamSize;
         if (wantTeams()) {
             System.out.print("Number of teams: ");
-            numCompetitors = scan.nextInt();
+            numUnits = scan.nextInt();
             System.out.print("Number of players per team: ");
             teamSize = scan.nextInt();
         }
         else {
             System.out.print("Number of players: ");
-            numCompetitors = scan.nextInt();
+            numUnits = scan.nextInt();
             teamSize = 1;
         }
 
-        int[] scoreArray = new int[numCompetitors];
-        int[] competitorArray = new int[numCompetitors];
-        for (int i = 0; i <= numCompetitors - 1; i++) {
-            competitorArray[i] = i + 1;
+        int[] scoreArray = new int[numUnits];
+        int[] unitArray = new int[numUnits];
+        for (int i = 0; i <= numUnits - 1; i++) {
+            unitArray[i] = i + 1;
         }
 
-        game(numHoles, competitorArray, scoreArray, teamSize, pars);
+        game(numHoles, unitArray, scoreArray, teamSize, pars);
 
         System.out.println("Final Scores");
-        int winner = bestPlayer(numCompetitors, scoreArray, teamSize, numHoles, pars);
-        String winnerType = getCompetitor(teamSize);
+        int winner = bestPlayer(numUnits, scoreArray, teamSize, numHoles, pars);
+        String winnerType = getUnit(teamSize);
         System.out.println(winnerType + " " + winner + " wins!");
+    }
+
+    public static String getCourse() {
+        String course;
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Enter a course: ");
+        course = scan.nextLine();
+        return course;
     }
 
     public static int getHoles() {
@@ -97,6 +96,20 @@ public class Main {
         }
     }
 
+    public static void getGame(Vector pars, String course, int numHoles, String section) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("coursePars.csv"));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] row = line.split(",");
+            pars.Modify(row);
+
+            if (pars.array[0].equals(course)) {
+                pars.getPars(numHoles, section);
+                break;
+            }
+        }
+    }
+
     public static boolean wantTeams() {
         Scanner scan = new Scanner(System.in);
         int choice;
@@ -107,23 +120,22 @@ public class Main {
             choice = scan.nextInt();
             if (choice == 1) {
                 return true;
-            }
-            else if (choice == 2) {
+            } else {
                 return false;
             }
         }
     }
 
-    public static void game(int numHoles, int[] competitorArray, int[] scoreArray, int teamSize, Vector pars) {
+    public static void game(int numHoles, int[] unitArray, int[] scoreArray, int teamSize, Vector pars) {
         Scanner scan = new Scanner(System.in);
         int par;
         for (int h = 1; h <= numHoles; h++) {
             par = Integer.parseInt(pars.array[h - 1]);
             System.out.println("Hole " + h + " Par " + par);
             int score;
-            for (int t = 0; t <= competitorArray.length - 1; t++) {
+            for (int t = 0; t <= unitArray.length - 1; t++) {
                 for (int p = 1; p <= teamSize; p++) {
-                    printCompetitor(t, p, teamSize, competitorArray);
+                    printUnit(t, p, teamSize, unitArray);
                     score = scan.nextInt();
                     scoreType(score, par);
                     scoreArray[t] += score;
@@ -132,12 +144,12 @@ public class Main {
         }
     }
 
-    public static void printCompetitor(int t, int p, int teamSize, int[] competitorArray) {
+    public static void printUnit(int t, int p, int teamSize, int[] unitArray) {
         if (teamSize == 1) {
-            System.out.print("Player " + competitorArray[t] + " Score: ");
+            System.out.print("Player " + unitArray[t] + " Score: ");
         }
         else {
-            System.out.print("Team " + competitorArray[t] + " Player " + p + " Score: ");
+            System.out.print("Team " + unitArray[t] + " Player " + p + " Score: ");
         }
     }
 
@@ -155,26 +167,26 @@ public class Main {
         }
     }
 
-    public static int bestPlayer(int competitors, int[] array, int teamSize, int numHoles, Vector pars) {
-        int bestScore = array[0];
+    public static int bestPlayer(int numUnits, int[] scoreArray, int teamSize, int numHoles, Vector pars) {
+        int bestScore = scoreArray[0];
         int winner = 1;
         int score;
-        String competitor = getCompetitor(teamSize);
+        String unit = getUnit(teamSize);
 
-        System.out.println(competitor + " 1: " + bestScore);
-        for (int c = 2; c <= competitors; c++) {
-            score = array[c - 1];
-            System.out.println(competitor + " " + c + ": " + score);
+        System.out.println(unit + " 1: " + bestScore);
+        for (int u = 2; u <= numUnits; u++) {
+            score = scoreArray[u - 1];
+            System.out.println(unit + " " + u + ": " + score);
             if (score < bestScore) {
                 bestScore = score;
-                winner = c;
+                winner = u;
             }
         }
 
-        for (int c = 1; c <= competitors; c++) {
-            if (array[c - 1] == bestScore) {
-                if (c != winner) {
-                    winner = suddenDeath(c, winner, teamSize, numHoles, pars);
+        for (int u = 1; u <= numUnits; u++) {
+            if (scoreArray[u - 1] == bestScore) {
+                if (u != winner) {
+                    winner = suddenDeath(u, winner, teamSize, numHoles, pars);
                     break;
                 }
             }
@@ -183,7 +195,7 @@ public class Main {
         return winner;
     }
 
-    public static String getCompetitor(int teamSize) {
+    public static String getUnit(int teamSize) {
         if (teamSize == 1) {
             return "Player";
         }
@@ -193,20 +205,19 @@ public class Main {
     }
 
     public static int suddenDeath(int p1, int p2, int teamSize, int numHoles, Vector pars) {
-        String competitor = getCompetitor(teamSize);
+        String unit = getUnit(teamSize);
 
-        System.out.println(competitor + "s " + p1 + " and " + p2 + " are tied for first place!");
+        System.out.println(unit + "s " + p1 + " and " + p2 + " are tied for first place!");
         int[] scoreArray = new int[2];
-        int[] competitorArray = {p1, p2};
+        int[] unitArray = {p1, p2};
         int round = 1;
-        Vector suddenDeathPars = new Vector();
-        suddenDeathPars.grow(pars.array[0]);
+        Vector suddenDeathPars = new Vector(new String[1]);
 
         while (scoreArray[0] == scoreArray[1]) {
             for (int h = 1; h <= numHoles; h++) {
                 suddenDeathPars.array[0] = pars.array[h - 1];
                 System.out.println("Sudden Death Round " + round);
-                game(1, competitorArray, scoreArray, teamSize, suddenDeathPars);
+                game(1, unitArray, scoreArray, teamSize, suddenDeathPars);
                 if (scoreArray[0] != scoreArray[1]) {
                     break;
                 }
