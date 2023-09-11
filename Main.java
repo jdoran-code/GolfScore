@@ -203,7 +203,7 @@ public class Main {
             return "Team";
         }
     }
-
+    
     public static int suddenDeath(int p1, int p2, int teamSize, int numHoles, Vector pars) {
         String unit = getUnit(teamSize);
 
