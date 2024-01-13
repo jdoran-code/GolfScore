@@ -195,6 +195,8 @@ public class GolfScore {
      */
     public static void setup(ChainedHashTable courses) {
         String courseName;
+        // A queue containing the pars of the 18 holes, in order, 
+        // for the selected course
         LLQueue<String> coursePars;
         courseName = scan.nextLine();
 
@@ -289,9 +291,11 @@ public class GolfScore {
     }
     
     public static void main(String[] args) throws IOException {
-        ChainedHashTable courses = new ChainedHashTable(20);
         BufferedReader reader = new BufferedReader(new FileReader("coursePars.csv"));
         String line;
+        // A hash table containing associated data with all golf courses
+        // on file, using the course's name as the key
+        ChainedHashTable courses = new ChainedHashTable(20);
 
         while ((line = reader.readLine()) != null) {
             String[] entry = line.split(",");
